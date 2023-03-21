@@ -30,3 +30,23 @@
 *.exe
 *.out
 *.app
+
+# Personal
+*.user
+
+# Directories
+/bin
+/bin-int
+/lib
+/.vs
+/.idea
+/build
+/out
+/Testing
+
+
+# CMake build directories
+/cmake-build-debug
+/cmake-build-release
+/cmake-build-minsizerel
+/cmake-build-relwithdebinfo

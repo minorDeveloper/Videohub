@@ -1,0 +1,6 @@
+[submodule "extern/sfml"]
+	path = extern/sfml
+	url = https://github.com/SFML/SFML.git
+[submodule "extern/spdlog"]
+	path = extern/spdlog
+	url = https://github.com/gabime/spdlog
