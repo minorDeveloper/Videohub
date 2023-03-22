@@ -23,82 +23,61 @@ class VideoHubRender {
 
     // Test properties (in pixels)
     int margin = 20;
-    int textSize = 16;
-    int lineThickness = 3;
+    int textSize = 14;
+    int lineThickness = 2;
 
     sf::FloatRect inputTextSize, outputTextSize;
 
 
+    int count_digit(int number) {
+        return int(log10(number) + 1);
+    }
+
+    std::string generateDigitString(int inputIndex, int maxInputIndex) {
+        int maxInputDigit = count_digit(maxInputIndex);
+        int currentInputDigit = count_digit(inputIndex);
+        std::string digitString = "";
+        for (int i = 0; i < maxInputDigit - currentInputDigit; i++)
+            digitString += "0";
+
+        digitString += std::to_string(inputIndex);
+        return digitString;
+    }
 
     void render() {
-        videohubTexture.clear();
-        // Draw debug margins
-        sf::RectangleShape rect;
-        sf::RectangleShape rect2;
-        rect.setFillColor(sf::Color::Red);
-        rect.setSize(sf::Vector2f(margin, videohubTextureSize.y));
-        rect.setPosition(sf::Vector2f(0.f, 0.f));
-        videohubTexture.draw(rect);
-        rect.setPosition(sf::Vector2f(videohubTextureSize.x - margin, 0.f));
-        videohubTexture.draw(rect);
-
-
-        rect.setSize(sf::Vector2f(videohubTextureSize.x, margin));
-        rect.setPosition(sf::Vector2f(0.f, 0.f));
-        videohubTexture.draw(rect);
-        rect.setPosition(sf::Vector2f(0.f, videohubTextureSize.y - margin));
-        videohubTexture.draw(rect);
-
-        rect.setFillColor(sf::Color::Cyan);
-        rect.setPosition(sf::Vector2f(margin, margin));
-        rect.setSize(sf::Vector2f(inputTextSize.width, outputTextSize.width));
-        videohubTexture.draw(rect);
+        videohubTexture.clear(sf::Color::White);
 
         inputText.setCharacterSize(textSize);
         inputText.setFont(font);
+        inputText.setFillColor(sf::Color::Black);
+
         outputText.setCharacterSize(textSize);
         outputText.setFont(font);
+        outputText.setFillColor(sf::Color::Black);
 
         // Determine longest input word
-        inputText.setString(videohub->longestInputLabel());
+        inputText.setString(videohub->longestInputLabel() + " - " + generateDigitString(1, videohub->inputs()));
         inputTextSize = inputText.getLocalBounds();
 
-
         // Determine longest output word
-        outputText.setString(videohub->longestOutputLabel());
+        outputText.setString(videohub->longestOutputLabel() + " - " + generateDigitString(1, videohub->outputs()));
         outputTextSize = outputText.getLocalBounds();
 
-        float inputWordGap  = (videohubTextureSize.y - (2 * margin + outputTextSize.width + (videohub->inputs() - 1) * inputTextSize.height * 1.2)) / (videohub->inputs() - 1);
+        float inputZeroOffset  = 3 * margin + outputTextSize.width;
+        float outputZeroOffset = 3 * margin + inputTextSize.width;
 
-
-        float outputWordGap = (videohubTextureSize.x - (2 * margin + inputTextSize.width + (videohub->outputs() - 1) * outputTextSize.height * 1.2)) / (videohub->outputs() - 1);
-
-
+        float inputWordGap  = (videohubTextureSize.y - (2 * margin + inputZeroOffset +  (videohub->inputs() - 1)  * inputTextSize.height )) / (videohub->inputs()  - 1);
+        float outputWordGap = (videohubTextureSize.x - (2 * margin + outputZeroOffset + (videohub->outputs() - 1) * outputTextSize.height)) / (videohub->outputs() - 1);
 
         // Draw the inputs
-        //rect.setFillColor(sf::Color::Blue);
-        //rect.setSize(sf::Vector2f(inputTextSize.width, inputTextSize.height));
-
-        //rect2.setFillColor(sf::Color::Green);
-        //rect2.setSize(sf::Vector2f(inputTextSize.width, inputWordGap - inputTextSize.height));
-
         sf::Vector2f textPosition;
-        //sf::Vector2f rect2Position;
-        for (int i = 0; i < videohub->inputs(); i++) {
-            std::string str = videohub->getVideoInputLabel(i);
-            inputText.setString(str);
-            textPosition.y = 2 * margin + outputTextSize.width + i * inputWordGap;
+        for (int inputIndex = 0; inputIndex < videohub->inputs(); inputIndex++) {
+            std::string str = videohub->getVideoInputLabel(inputIndex);
+            inputText.setString(str + " - " + generateDigitString(inputIndex + 1, videohub->inputs()));
+            textPosition.y = inputZeroOffset + inputIndex * (inputWordGap + inputTextSize.height);
             textPosition.x = margin + (inputTextSize.width - inputText.getLocalBounds().width);
+
             inputText.setPosition(textPosition);
-
-
-            //rect.setPosition(textPosition);
-            //rect2Position.x = margin;
-            //rect2Position.y = margin + outputTextSize.width + i * inputWordGap + inputTextSize.height * 1.2;
-
-            //rect2.setPosition(rect2Position);
-            //videohubTexture.draw(rect2);
-
             videohubTexture.draw(inputText);
 
         }
@@ -107,36 +86,46 @@ class VideoHubRender {
         // Draw the Outputs
         outputText.setRotation(sf::degrees(270));
 
-        for (int i = 0; i < videohub->outputs(); i++) {
-            std::string str = videohub->getVideoOutputLabel(i);
-            outputText.setString(str);
+        for (int outputIndex = 0; outputIndex < videohub->outputs(); outputIndex++) {
+            std::string str = videohub->getVideoOutputLabel(outputIndex);
+            outputText.setString(generateDigitString(outputIndex + 1, videohub->outputs()) + " - " + str);
             textPosition.y = margin + outputTextSize.width;
-            textPosition.x = 2 * margin + inputTextSize.width + outputWordGap * i;
+            textPosition.x = outputZeroOffset + outputIndex * (outputWordGap + outputTextSize.height);
+
             outputText.setPosition(textPosition);
             videohubTexture.draw(outputText);
         }
 
         // Draw the lines
         sf::RectangleShape horizLine, vertLine;
-        horizLine.setFillColor(sf::Color::White);
-        vertLine.setFillColor(sf::Color::White);
-        for (int output = 0; output < videohub->outputs(); output++) {
-            int input = videohub->getVideoOutputRouting(output);
-            float inputHeight = 2 * margin + outputTextSize.width + (output) * inputWordGap + inputTextSize.height * 0.5 - lineThickness / 2;
-            float outputWidth = 2 * margin + inputTextSize.width + (input) * outputWordGap + outputTextSize.height * 0.5 - lineThickness / 2;
 
-            horizLine.setSize(sf::Vector2f( 50, lineThickness)); //outputWidth - (2 * margin - inputTextSize.width)
-            horizLine.setPosition(sf::Vector2f(margin + inputTextSize.width, inputHeight));
 
-            vertLine.setSize(sf::Vector2f(lineThickness, 50)); // inputHeight - (2 * margin - outputTextSize.width)
-            vertLine.setPosition(sf::Vector2f(outputWidth, 2*margin + outputTextSize.width));
+        for (int outputIndex = 0; outputIndex < videohub->outputs(); outputIndex++) { //
+            int inputIndex = videohub->getVideoOutputRouting(outputIndex);
 
-            videohubTexture.draw(horizLine);
+            vertLine.setPosition(sf::Vector2f(outputZeroOffset + outputIndex * (outputWordGap + outputTextSize.height) + 0.5 * (outputTextSize.height + lineThickness), inputZeroOffset - margin));
+            vertLine.setSize(sf::Vector2f(lineThickness, inputIndex * (inputWordGap + inputTextSize.height) + 0.5 * inputTextSize.height + 1.5 * lineThickness + margin));
+
+            horizLine.setPosition(sf::Vector2f(outputZeroOffset - margin, inputZeroOffset + inputIndex * (inputWordGap + inputTextSize.height) + 0.5 * (inputTextSize.height + lineThickness)));
+            horizLine.setSize(sf::Vector2f(outputIndex * (outputWordGap + outputTextSize.height) + 0.5 * outputTextSize.height + 1.5 * lineThickness + margin, lineThickness));
+
+            sf::Color lineColor;
+            switch (videohub->getVideoOutputLock(outputIndex)) {
+                case LockStatus::owned:
+                    lineColor = sf::Color::Blue;
+                    break;
+                case LockStatus::unlocked:
+                    lineColor = sf::Color::Black;
+                    break;
+                case LockStatus::locked:
+                    lineColor = sf::Color::Red;
+            }
+            horizLine.setFillColor(lineColor);
+            vertLine.setFillColor(lineColor);
+
             videohubTexture.draw(vertLine);
+            videohubTexture.draw(horizLine);
         }
-
-
-        videohubTexture.draw(inputText);
 
         videohubTexture.display();
     }
