@@ -51,9 +51,19 @@ link_directories("${CMAKE_BINARY_DIR}/extern/sfml/lib")
 
 
 #add_subdirectory("extern/imgui")
-#add_subdirectory("extern/imgui-sfml")
+
+set(IMGUI_DIR "/extern/imgui")
+set(ImGui_INCLUDE_DIR "/extern/imgui")
+set(IMGUI_SFML_FIND_SFML OFF)
+set(IMGUI_SFML_IMGUI_DEMO ON)
+
+add_subdirectory("extern/imgui-sfml")
+
+
 set(IMGUI_INCS "extern/imgui")
+link_directories("${CMAKE_BINARY_DIR}/extern/imgui")
 set(IMGUI_SFML_INCS "extern/imgui-sfml")
+link_directories("${CMAKE_BINARY_DIR}/extern/imgui-sfml")
 
 find_package(OpenGL REQUIRED)
 
@@ -74,9 +84,9 @@ endif()
 
 
 file(GLOB_RECURSE SOURCES src/*.cpp src/*.h)
-add_executable(Videohub ${SOURCES} extern/imgui-sfml/imgui-SFML.cpp)
+add_executable(Videohub ${SOURCES})
 target_include_directories(Videohub PRIVATE ${SFML_INCS} ${IMGUI_INCS} ${IMGUI_SFML_INCS})
-target_link_libraries(Videohub PRIVATE  sfml-window sfml-graphics OpenGL::GL)
+target_link_libraries(Videohub PRIVATE  sfml-window sfml-graphics OpenGL::GL ImGui-SFML)
 
 add_custom_command(TARGET Videohub POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:Videohub> ${OUTPUT_DIRECTORY}

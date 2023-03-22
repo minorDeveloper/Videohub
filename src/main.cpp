@@ -5,8 +5,8 @@
 #include "VideoHub.h"
 #include "VideoHubRender.h"
 
-#include "imgui.h"
 #include "imgui-SFML.h"
+#include "imgui.h"
 
 int main() {
     std::shared_ptr<VideoHub> videohub(new VideoHub(DeviceStatus::connected, "Blackmagic Smart Videohub 40 x 40", 40, 40));
@@ -178,6 +178,8 @@ int main() {
 
 
     sf::RenderWindow window(sf::VideoMode(sf::Vector2u(1200,1000)), "Blackmagic Videohub");
+
+    ImGui::SFML::Init(window);
     sf::Font monofont;
     if (!monofont.loadFromFile(".\\resources\\fonts\\VeraMono.ttf")) {
     //    // Todo: handle exception
