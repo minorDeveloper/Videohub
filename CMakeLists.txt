@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.20)
 project(Videohub
         VERSION 0.1
         DESCRIPTION "Blackmagic videohub integration"
@@ -49,6 +49,14 @@ add_subdirectory("extern/sfml")
 set(SFML_INCS "extern/sfml/include")
 link_directories("${CMAKE_BINARY_DIR}/extern/sfml/lib")
 
+
+#add_subdirectory("extern/imgui")
+#add_subdirectory("extern/imgui-sfml")
+set(IMGUI_INCS "extern/imgui")
+set(IMGUI_SFML_INCS "extern/imgui-sfml")
+
+find_package(OpenGL REQUIRED)
+
 ####
 
 # The compiled library code is here
@@ -66,10 +74,9 @@ endif()
 
 
 file(GLOB_RECURSE SOURCES src/*.cpp src/*.h)
-add_executable(Videohub ${SOURCES})
-message(${SFML_INCS})
-target_include_directories(Videohub PRIVATE ${SFML_INCS})
-target_link_libraries(Videohub PRIVATE -static sfml-window sfml-graphics)
+add_executable(Videohub ${SOURCES} extern/imgui-sfml/imgui-SFML.cpp)
+target_include_directories(Videohub PRIVATE ${SFML_INCS} ${IMGUI_INCS} ${IMGUI_SFML_INCS})
+target_link_libraries(Videohub PRIVATE  sfml-window sfml-graphics OpenGL::GL)
 
 add_custom_command(TARGET Videohub POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:Videohub> ${OUTPUT_DIRECTORY}

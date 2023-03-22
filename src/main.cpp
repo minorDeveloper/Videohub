@@ -5,6 +5,9 @@
 #include "VideoHub.h"
 #include "VideoHubRender.h"
 
+#include "imgui.h"
+#include "imgui-SFML.h"
+
 int main() {
     std::shared_ptr<VideoHub> videohub(new VideoHub(DeviceStatus::connected, "Blackmagic Smart Videohub 40 x 40", 40, 40));
     std::vector<LockStatus> outputLocks = {LockStatus::unlocked,
