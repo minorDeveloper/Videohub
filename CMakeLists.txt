@@ -7,6 +7,7 @@ project(Videohub
 SET(OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/")
 # Ouput all DLLs from all libs into main build folder
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 
 # Only do these if this is the main project, and not if it is included through add_subdirectory
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -51,20 +52,31 @@ link_directories("${CMAKE_BINARY_DIR}/extern/sfml/lib")
 ####
 
 # The compiled library code is here
-add_subdirectory(src)
+#add_subdirectory(src)
 
 # Final application is here
-add_subdirectory(apps)
+#add_subdirectory(apps)
 
 # Testing only available if this is the main app
-# Emergency override ARKTOS_BUILD_TESTING)provided as well
 if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         AND BUILD_TESTING)
     message("Testing enabled")
     add_subdirectory(tests)
 endif()
 
+
 file(GLOB_RECURSE SOURCES src/*.cpp src/*.h)
 add_executable(Videohub ${SOURCES})
+message(${SFML_INCS})
 target_include_directories(Videohub PRIVATE ${SFML_INCS})
-target_link_libraries(Videohub sfml-graphics)
+target_link_libraries(Videohub PRIVATE -static sfml-window sfml-graphics)
+
+add_custom_command(TARGET Videohub POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:Videohub> ${OUTPUT_DIRECTORY}
+        COMMAND_EXPAND_LISTS
+        )
+
+add_custom_command(TARGET Videohub POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory  "${PROJECT_SOURCE_DIR}/resources/" "${OUTPUT_DIRECTORY}/resources/"
+        COMMAND_EXPAND_LISTS
+        )
