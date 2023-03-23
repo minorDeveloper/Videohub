@@ -104,6 +104,16 @@ public:
         return longestString(this->outputLabels);
     }
 
+    std::string getName() {
+        return name;
+    }
+
+    std::string getSafeName() {
+        std::string str = name;
+        str.erase(std::remove_if(str.begin(), str.end(), isspace), str.end());
+        return str;
+    }
+
     std::uint8_t inputs() {
         return videoInputs;
     }

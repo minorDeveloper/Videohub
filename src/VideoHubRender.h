@@ -8,8 +8,13 @@
 #include <memory>
 #include <algorithm>
 #include <iostream>
+
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
+
+#include "imgui/imgui.h"
+#include "imgui/imgui-SFML.h"
+
 #include "VideoHub.h"
 
 class VideoHubRender {
@@ -27,7 +32,12 @@ class VideoHubRender {
     int lineThickness = 2;
 
     sf::FloatRect inputTextSize, outputTextSize;
+    float backgroundColorF[3] = {1.f, 1.f, 1.f};
+    float textColorF[3] = {0.f, 0.f, 0.f};
 
+    sf::Color floatToColor(float color[3]) {
+        return sf::Color(uint8_t(color[0] * 255.0), uint8_t(color[0] * 255.0), uint8_t(color[0] * 255.0));
+    }
 
     int count_digit(int number) {
         return int(log10(number) + 1);
@@ -45,15 +55,15 @@ class VideoHubRender {
     }
 
     void render() {
-        videohubTexture.clear(sf::Color::White);
+        videohubTexture.clear(floatToColor(backgroundColorF));
 
         inputText.setCharacterSize(textSize);
         inputText.setFont(font);
-        inputText.setFillColor(sf::Color::Black);
+        inputText.setFillColor(floatToColor(textColorF));
 
         outputText.setCharacterSize(textSize);
         outputText.setFont(font);
-        outputText.setFillColor(sf::Color::Black);
+        outputText.setFillColor(floatToColor(textColorF));
 
         // Determine longest input word
         inputText.setString(videohub->longestInputLabel() + " - " + generateDigitString(1, videohub->inputs()));
@@ -128,6 +138,7 @@ class VideoHubRender {
         }
 
         videohubTexture.display();
+        dirty = false;
     }
 
 public:
@@ -142,6 +153,19 @@ public:
 
     void render(sf::RenderWindow *window){
         if(dirty) this->render();
+
+        ImGui::Begin("Render Control");
+        ImGui::ColorEdit3("Background color", backgroundColorF);
+        ImGui::ColorEdit3("Font color", textColorF);
+        if (ImGui::Button("Export png")) {
+            videohubTexture.getTexture().copyToImage().saveToFile(videohub->getSafeName() + ".png");
+        }
+        if (ImGui::Button("Re-render")) {
+            dirty = true;
+        }
+        ImGui::End();
+
+
 
         const sf::Texture& texture = videohubTexture.getTexture();
         sf::Sprite sprite(texture);

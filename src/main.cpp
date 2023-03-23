@@ -5,11 +5,13 @@
 #include "VideoHub.h"
 #include "VideoHubRender.h"
 
-#include "imgui-SFML.h"
-#include "imgui.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui-SFML.h"
+
+#include "spdlog/spdlog.h"
 
 int main() {
-    std::shared_ptr<VideoHub> videohub(new VideoHub(DeviceStatus::connected, "Blackmagic Smart Videohub 40 x 40", 40, 40));
+    std::shared_ptr<VideoHub> videohub(new VideoHub(DeviceStatus::connected, "MTX201", 40, 40));
     std::vector<LockStatus> outputLocks = {LockStatus::unlocked,
                                            LockStatus::unlocked,
                                            LockStatus::unlocked,
@@ -176,30 +178,40 @@ int main() {
     videohub->setVideoOutputLocks(outputLocks);
     videohub->setVideoOutputRouting(portRouting);
 
+    spdlog::info("Test log message");
+
 
     sf::RenderWindow window(sf::VideoMode(sf::Vector2u(1200,1000)), "Blackmagic Videohub");
-
+    window.setFramerateLimit(60);
     ImGui::SFML::Init(window);
+
     sf::Font monofont;
     if (!monofont.loadFromFile(".\\resources\\fonts\\VeraMono.ttf")) {
     //    // Todo: handle exception
     }
+
+    sf::Clock deltaClock;
 
     VideoHubRender videohubrender(videohub, monofont, sf::Vector2u(1200, 1000));
 
     while (window.isOpen()){
         sf::Event event;
         while (window.pollEvent(event)){
+            ImGui::SFML::ProcessEvent(window, event);
             if (event.type == sf::Event::Closed){
                 window.close();
             }
         }
+
+        ImGui::SFML::Update(window, deltaClock.restart());
         window.clear();
 
         // Draw stuff here
         videohubrender.render(&window);
+        ImGui::SFML::Render(window);
 
         window.display();
     }
+    ImGui::SFML::Shutdown();
     return 0;
 }
