@@ -89,10 +89,10 @@ add_executable(Videohub ${SOURCES})
 target_include_directories(Videohub PRIVATE ${SFML_INCS} ${IMGUI_COMBINED_INCS}) # ${IMGUI_INCS} ${IMGUI_SFML_INCS})
 target_link_libraries(Videohub PRIVATE  sfml-window sfml-graphics OpenGL::GL)
 
-add_custom_command(TARGET Videohub POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:Videohub> ${OUTPUT_DIRECTORY}
-        COMMAND_EXPAND_LISTS
-        )
+#add_custom_command(TARGET Videohub POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:Videohub> ${OUTPUT_DIRECTORY}
+#        COMMAND_EXPAND_LISTS
+#        )
 
 add_custom_command(TARGET Videohub POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory  "${PROJECT_SOURCE_DIR}/resources/" "${OUTPUT_DIRECTORY}/resources/"
